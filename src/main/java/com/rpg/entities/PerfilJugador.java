@@ -1,0 +1,38 @@
+package com.rpg.entities;
+
+import java.util.Collections;
+import java.util.Set;
+import java.util.TreeSet;
+
+public class PerfilJugador {
+
+    private int victorias;
+    private int derrotas;
+    private final Set<String> logros = new TreeSet<>();
+
+    public void registrarVictoria() {
+        victorias++;
+    }
+
+    public void registrarDerrota() {
+        derrotas++;
+    }
+
+    /** @return true si el logro era nuevo; false si ya estaba desbloqueado */
+    public boolean desbloquearLogro(String logro) {
+        return logros.add(logro);
+    }
+
+    public int getVictorias() {
+        return victorias;
+    }
+
+    public int getDerrotas() {
+        return derrotas;
+    }
+
+    /** Los logros salen ordenados alfabeticamente porque se guardan en un TreeSet. */
+    public Set<String> getLogros() {
+        return Collections.unmodifiableSet(logros);
+    }
+}
