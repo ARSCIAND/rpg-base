@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 /** Agregacion: el gremio guarda referencias a personajes que existen por su cuenta. */
+// TALLER ARCHIVOS: candidata a Serializable (guarda la lista de Personaje, que tambien debe serlo).
 public class Gremio {
 
     private final String nombre;

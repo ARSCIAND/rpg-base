@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
+// TALLER ARCHIVOS: candidata a Serializable (victorias, derrotas y logros son parte de la partida).
 public class PerfilJugador {
 
     private int victorias;

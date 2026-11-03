@@ -22,6 +22,8 @@ public class Main {
         int opcion;
         do {
             mostrarMenu();
+            // TALLER ARCHIVOS: aqui podrias ofrecer "Cargar partida" (y ver/borrar archivos con File), leyendo
+            // el archivo con ObjectInputStream y delegando en el motor. Hoy el menu solo llega hasta la opcion 3.
             opcion = consola.leerEntero("Opcion: ", 0, 3);
             switch (opcion) {
                 case 1 -> motor.combateRapido();

@@ -3,6 +3,7 @@ package com.rpg.items;
 import com.rpg.entities.EstadoEfecto;
 import com.rpg.entities.enums.RaridadItem;
 
+// TALLER ARCHIVOS: candidata a Serializable (guarda un EstadoEfecto, que tambien debe serlo).
 public class Pocion {
 
     private final String nombre;

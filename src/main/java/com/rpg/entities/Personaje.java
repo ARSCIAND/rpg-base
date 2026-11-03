@@ -16,6 +16,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+// TALLER ARCHIVOS: para guardar la partida con ObjectOutputStream, Personaje debe volverse Serializable
+// (con serialVersionUID). Piensa que campos son transient y que clases anidadas (Inventario, Pocion, Arma,
+// Gremio, EstadoEfecto, enums) tambien deben ser Serializable, o tendras NotSerializableException.
+// Ojo: Gremio y Personaje se referencian entre si (la serializacion maneja el ciclo).
 public abstract class Personaje implements ICombatiente {
 
     private static final int VIDA_BASE = 100;

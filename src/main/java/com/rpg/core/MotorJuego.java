@@ -29,6 +29,8 @@ public class MotorJuego {
     private final PerfilJugador perfil = new PerfilJugador();
     private final Gremio gremio = new Gremio(NOMBRE_GREMIO);
     private final TorneoManager torneo = new TorneoManager(arena, registro);
+    // TALLER ARCHIVOS: ultimoGuardado es solo el estado de la partida en memoria. Aqui (o en un metodo
+    // nuevo como cargarProgreso) iria la carga de una partida guardada en disco; llamala desde Main.
     private String ultimoGuardado = "";
 
     public MotorJuego(Consola consola) {
@@ -255,6 +257,8 @@ public class MotorJuego {
      * archivo. Hoy solo se invoca al terminar una pelea.
      */
     public void guardarProgreso() {
+        // TALLER ARCHIVOS: ademas de dejar el texto en memoria, escribe la partida en disco (por ejemplo un
+        // .txt con BufferedWriter, y/o un .dat serializando el estado con ObjectOutputStream). Usa try-with-resources.
         // TALLER CONCURRENCIA: este guardado es manual. Debera hacerse solo, de fondo, mientras se juega.
         StringBuilder contenido = new StringBuilder();
         contenido.append("=== PARTIDA RPG ===").append(System.lineSeparator());

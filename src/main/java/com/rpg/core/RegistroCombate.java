@@ -18,6 +18,8 @@ public class RegistroCombate {
         texto.setLength(0);
     }
 
+    // TALLER ARCHIVOS: aqui iria volcar el registro de combate a un archivo .txt (BufferedWriter + FileWriter,
+    // con append si quieres conservar combates anteriores) y leerlo de vuelta con BufferedReader.
     public String getTexto() {
         return texto.toString();
     }

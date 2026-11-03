@@ -7,3 +7,5 @@ target/
 .settings/
 *.class
 *.log
+*.dat
+partidas/

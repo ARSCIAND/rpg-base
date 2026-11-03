@@ -9,7 +9,7 @@ de forma **100 % secuencial**: todo ocurre en un unico hilo, una cosa despues de
 
 1. Leer el codigo y comprobar que reconoces cada concepto de los talleres anteriores.
 2. Ejecutar el juego y ver donde la ejecucion secuencial se queda corta.
-3. Identificar los puntos de extension (buscalos con el comentario `TALLER CONCURRENCIA`).
+3. Identificar los puntos de extension (buscalos con los comentarios `TALLER CONCURRENCIA` y `TALLER ARCHIVOS`).
 
 ## Como compilar y ejecutar
 
@@ -34,8 +34,9 @@ El juego lee de `System.in`, asi que tambien puedes probarlo sin teclado:
 printf '1\n1\nThor\n1\n1\n1\n1\n0\n' | java -cp out com.rpg.Main
 ```
 
-El juego no escribe ningun archivo: el progreso se guarda en memoria (`MotorJuego.getUltimoGuardado()`),
-solo cuando termina una pelea. El manejo de archivos se ve mas adelante en el curso.
+Hoy el juego no escribe ningun archivo: el progreso se guarda **en memoria** (`MotorJuego.getUltimoGuardado()`)
+y es el *estado de la partida*, que se actualiza cuando termina una pelea. El taller de **Manejo de Archivos**
+lleva ese estado a disco (buscalo con el comentario `TALLER ARCHIVOS`).
 
 ## Estructura de paquetes
 
@@ -59,6 +60,7 @@ com.rpg
   exceptions/               JuegoException, SinManaException, CapacidadExcedidaException,
                             VidaInsuficienteException
   concurrency/              VACIO a proposito (solo package-info.java)
+  persistencia/             VACIO a proposito (solo package-info.java), para el taller de archivos
 ```
 
 ## Lo que ya debes tener (checklist)
@@ -85,7 +87,19 @@ Estos cuatro modulos van en el paquete `com.rpg.concurrency` (y en los puntos ma
    no hay tareas independientes ni forma de cancelarlas a mitad de camino.
 3. **Semifinales en paralelo con `join`**: `TorneoManager.jugarTorneo` simula una semifinal despues de otra.
 4. **Auto-guardado daemon**: `MotorJuego.guardarProgreso` solo se invoca manualmente al terminar una pelea
-   (y guarda en memoria, sin archivos).
+   (y guarda en memoria; llevarlo a disco es parte del taller de archivos).
+
+## Que NO tiene aun (taller de archivos)
+
+Estos modulos van en el paquete `com.rpg.persistencia` (y en los puntos marcados con `TALLER ARCHIVOS`):
+
+1. **Log de combate en texto**: `RegistroCombate` solo acumula y muestra el texto; no se guarda ni se lee
+   desde un archivo con `BufferedWriter` / `BufferedReader`.
+2. **Inspeccion y borrado de archivos**: no hay uso de `File` (existe, tamano, ruta) ni borrado con
+   `Files.deleteIfExists`.
+3. **Guardar y cargar partida**: `MotorJuego.guardarProgreso` deja un `String` en memoria; falta guardar el
+   estado con `Serializable` + `ObjectOutputStream` / `ObjectInputStream`, y una forma de cargarlo desde `Main`.
+4. **Control de la serializacion**: `transient` para lo que no debe guardarse y `serialVersionUID` en cada clase.
 
 ### Advertencia: condicion de carrera en la vida
 
@@ -103,6 +117,7 @@ operacion toca varias variables dependientes, la unidad 4.2 recomienda `synchron
 
 Marca cada punto cuando lo tengas funcionando. El orden sigue las secciones de la guia del taller.
 Las clases nuevas van en `com.rpg.concurrency` (y `TurnoCallback` en `com.rpg.core`).
+Mas abajo hay un checklist aparte para el taller de archivos.
 
 ### Antes de empezar
 
@@ -165,6 +180,66 @@ Las clases nuevas van en `com.rpg.concurrency` (y `TurnoCallback` en `com.rpg.co
 - [ ] Todo hilo de auto-guardado o monitoreo usa `setDaemon(true)` antes de `.start()` (ver "Investigacion obligatoria").
 - [ ] El `join()` del torneo espera a ambas semifinales antes de leer la memoria compartida de los ganadores.
 
+## Checklist del taller de archivos: lo que debes realizar
+
+Las clases nuevas van en `com.rpg.persistencia`. Los puntos de extension estan marcados con `TALLER ARCHIVOS`
+en `MotorJuego`, `RegistroCombate`, `Main` y las clases del dominio.
+
+### Antes de empezar
+
+- [ ] El proyecto compila y ejecutas `Main` sin errores.
+- [ ] Localizaste los comentarios `TALLER ARCHIVOS` y entiendes que el guardado actual es solo en memoria.
+
+### Seccion 1: Clase `File`
+
+- [ ] Crear un `File` con una ruta relativa y otro con una ruta absoluta (`getAbsolutePath()`), y explicar la diferencia.
+- [ ] Usar `exists()`, `length()` y `getName()` para mostrar informacion de un archivo de partida o de log.
+- [ ] Usar `createNewFile()` y manejar su `IOException`.
+- [ ] Crear la carpeta `partidas/` si no existe (`mkdirs()`), sin fallar si ya existe.
+
+### Seccion 2: Escritura (`BufferedWriter` + `FileWriter`)
+
+- [ ] Volcar el log de `RegistroCombate` a un `.txt` con `BufferedWriter` + `FileWriter`.
+- [ ] Escribir con `newLine()` en vez de concatenar saltos de linea a mano.
+- [ ] Usar `FileWriter(file, true)` para **agregar** (append) sin borrar los combates anteriores, y comprobar la diferencia con el modo por defecto, que sobrescribe.
+- [ ] Hacer `flush()` / cerrar el escritor para que el contenido llegue al disco.
+
+### Seccion 3: Lectura (`BufferedReader` + `FileReader`)
+
+- [ ] Leer el log con `BufferedReader` + `FileReader` usando `while ((linea = lector.readLine()) != null)`.
+- [ ] Mostrar por consola el historial leido (por ejemplo, una opcion nueva en el menu de `Main`).
+- [ ] Capturar `FileNotFoundException` cuando el archivo aun no existe y mostrar un mensaje claro (sin tildes).
+
+### Seccion 4: Borrado
+
+- [ ] Borrar un archivo con `File.delete()` y revisar el `boolean` que devuelve.
+- [ ] Borrar con `Files.deleteIfExists(Path)` y explicar la diferencia con `File.delete()`.
+- [ ] Ofrecer en el menu una opcion para borrar la partida guardada, confirmando antes con el jugador.
+
+### Seccion 5: Serializacion (`Serializable`, `ObjectOutputStream`, `ObjectInputStream`)
+
+- [ ] Hacer `Serializable` las clases del dominio que forman la partida: `Personaje` (y `Guerrero`, `Mago`, `Enemigo`), `Inventario`, `Pocion`, `Arma`, `Gremio`, `EstadoEfecto`, `PerfilJugador`.
+- [ ] Declarar `serialVersionUID` en cada clase serializable y explicar para que sirve.
+- [ ] Marcar con `transient` al menos un campo que no deba guardarse y comprobar que vuelve con su valor por defecto al cargar.
+- [ ] Guardar la partida con `ObjectOutputStream.writeObject(...)` en un `.dat`.
+- [ ] Cargar la partida con `ObjectInputStream.readObject()`, con el cast al tipo correcto.
+- [ ] Provocar y resolver una `NotSerializableException` por un objeto anidado que no es `Serializable`.
+- [ ] Comprobar que despues de cargar, el `Gremio` y sus `Personaje` siguen relacionados (el ciclo `Personaje` - `Gremio` se serializa bien).
+- [ ] Agregar una opcion "Cargar partida" y comprobar que el juego continua con el estado guardado.
+
+### Seccion 6: `try-with-resources` y excepciones
+
+- [ ] Todos los flujos (`BufferedWriter`, `BufferedReader`, `ObjectOutputStream`, `ObjectInputStream`) se abren con `try-with-resources` (`AutoCloseable`); ningun `close()` manual.
+- [ ] Manejas `IOException`, `FileNotFoundException` (la mas especifica va primero), `ClassNotFoundException` y `NotSerializableException` con mensajes utiles.
+- [ ] Ningun `catch` esta vacio ni solo imprime la traza.
+- [ ] El juego no se cae si el archivo no existe, esta corrupto o no se puede escribir.
+
+### Seccion 7: Integracion con concurrencia (si ya hiciste el taller anterior)
+
+- [ ] `AutoGuardadoDaemon` escribe a disco (ya no solo en memoria) cada cierto intervalo.
+- [ ] Protegiste la escritura y la lectura del mismo archivo con `synchronized` (sobre un mismo objeto candado o metodos de una clase compartida), para que el daemon y el hilo principal no lo accedan a la vez.
+- [ ] Comprobaste que, al cerrar el juego, el hilo daemon no deja un archivo a medio escribir.
+
 ## Investigacion obligatoria
 
 Dos temas de la guia no se explican en las presentaciones de las unidades 4.1 y 4.2. Debes investigarlos
@@ -177,12 +252,21 @@ por tu cuenta y dejar evidencia en el proyecto:
   y explica en 2 o 3 lineas cuando lo preferirias a `synchronized`. Si el `unlock()` no esta en el `finally`,
   el lock puede quedar tomado para siempre.
 
+## Investigacion obligatoria (taller de archivos)
+
+- [ ] **`FileWriter` vs `Files.writeString`.** Explica en 2 o 3 lineas la diferencia (flujo con buffer que
+  abres y cierras tu, frente a una sola llamada de NIO que escribe todo el texto) y cuando usarias cada uno.
+- [ ] **Seguridad de `Serializable`.** Explica por que no se debe deserializar (`readObject`) datos que no
+  son de confianza: un archivo manipulado puede ejecutar codigo o consumir recursos al reconstruir objetos.
+  Anota que alternativas existen (por ejemplo JSON o un formato de texto propio).
+
 ## Adaptaciones respecto a la guia
 
 Este proyecto sigue la guia del taller, con estas diferencias a proposito:
 
-- **Auto-guardado en memoria.** La guia habla de guardar "en el almacenamiento". Aqui el guardado es en
-  memoria (un `String` o una lista con la ultima copia) porque el manejo de archivos se ve mas adelante.
+- **Auto-guardado en memoria.** La guia habla de guardar "en el almacenamiento". En el taller de concurrencia
+  el guardado es en memoria (un `String` o una lista con la ultima copia): ese es el estado de la partida.
+  El taller de archivos lo lleva a disco (ver la seccion 7 del checklist de archivos).
 - **Reemplazo de `Personaje.procesarEfectos`.** La guia pide que cada efecto DoT/HoT corra en su propio hilo;
   este taller ademas te pide sustituir la logica por turnos actual por esos hilos.
 - **Mecanismo de sincronizacion.** La guia sugiere `synchronized`, `AtomicInteger` o `ReentrantLock`. Aqui el

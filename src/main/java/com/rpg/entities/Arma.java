@@ -2,6 +2,7 @@ package com.rpg.entities;
 
 import com.rpg.entities.enums.RaridadItem;
 
+// TALLER ARCHIVOS: candidata a Serializable (la referencia desde Personaje.arma la necesita).
 public class Arma {
 
     private final String nombre;
