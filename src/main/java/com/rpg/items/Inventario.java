@@ -5,10 +5,12 @@ import com.rpg.exceptions.CapacidadExcedidaException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.io.Serializable;
 
 /** Contenedor generico con capacidad limitada: Inventario&lt;Pocion&gt; solo acepta pociones. */
-// TALLER ARCHIVOS: debe volverse Serializable; ademas, los elementos T (hoy Pocion) tambien lo necesitan.
-public class Inventario<T> implements Iterable<T> {
+public class Inventario<T> implements Iterable<T>, Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final List<T> elementos = new ArrayList<>();
     private final int capacidad;

@@ -14,6 +14,7 @@ public class Arena {
     private static final int VARIACION_DANIO = 3;
     private static final int PROBABILIDAD_ESPECIAL_IA = 35;
     private static final int MAXIMO_RONDAS = 40;
+    private static final int PAUSA_RONDA_MS = 150;
 
     private final RegistroCombate registro;
     private final Random azar;
@@ -23,14 +24,11 @@ public class Arena {
         this.azar = azar;
     }
 
-    /** Procesa efectos y aturdimiento. @return true si el personaje puede actuar este turno */
+    /** Revisa si esta vivo y si esta aturdido. Los efectos ya no se procesan aqui, corren en su propio hilo. */
     public boolean iniciarTurno(Personaje personaje) {
         personaje.alIniciarTurno();
-        for (String mensaje : personaje.procesarEfectos()) {
-            registro.agregar(mensaje);
-        }
         if (!personaje.estaVivo()) {
-            registro.agregar("%s cae derrotado por sus efectos", personaje.getNombre());
+            registro.agregar("%s ya no puede luchar", personaje.getNombre());
             return false;
         }
         if (personaje.consumirAturdimiento()) {
@@ -76,12 +74,20 @@ public class Arena {
     }
 
     /** Pelea hasta que uno cae (o se acaban las rondas). @return el ganador */
-    public Personaje duelo(Personaje a, Personaje b) {
+    public Personaje duelo(Personaje a, Personaje b, String etiqueta) {
         for (int ronda = 1; ronda <= MAXIMO_RONDAS && a.estaVivo() && b.estaVivo(); ronda++) {
-            registro.agregar("-- Ronda %d --", ronda);
+            registro.agregar("%s-- Ronda %d --", etiqueta, ronda);
             turnoAutomatico(a, b);
             turnoAutomatico(b, a);
+            try {
+                Thread.sleep(PAUSA_RONDA_MS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
         }
+        a.detenerEfectos();
+        b.detenerEfectos();
         return a.getVida() >= b.getVida() ? a : b;
     }
 }

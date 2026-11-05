@@ -1,5 +1,4 @@
 /**
- * Paquete reservado para el taller de concurrencia.
- * Aqui iran TemporizadorTurnoTask, EfectoContinuoTask y AutoGuardadoDaemon.
+ * Clases del taller de concurrencia.
  */
 package com.rpg.concurrency;

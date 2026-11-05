@@ -42,15 +42,15 @@ public class Bestiario {
         return null;
     }
 
-    public void registrarEnemigoDerrotado(String nombre) {
+    public synchronized void registrarEnemigoDerrotado(String nombre) {
         derrotados.put(nombre, derrotados.getOrDefault(nombre, 0) + 1);
     }
 
-    public int vecesDerrotado(String nombre) {
+    public synchronized int vecesDerrotado(String nombre) {
         return derrotados.getOrDefault(nombre, 0);
     }
 
-    public String describir() {
+    public synchronized String describir() {
         StringBuilder texto = new StringBuilder();
         int numero = 1;
         for (Map.Entry<String, Enemigo> entrada : catalogo.entrySet()) {
@@ -62,10 +62,19 @@ public class Bestiario {
         return texto.toString();
     }
 
-    public String resumenDerrotados() {
+    public synchronized String resumenDerrotados() {
         if (derrotados.isEmpty()) {
             return "ninguno";
         }
         return derrotados.toString();
+    }
+
+    public synchronized Map<String, Integer> getDerrotados() {
+        return new LinkedHashMap<>(derrotados);
+    }
+
+    public synchronized void cargarDerrotados(Map<String, Integer> guardados) {
+        derrotados.clear();
+        derrotados.putAll(guardados);
     }
 }

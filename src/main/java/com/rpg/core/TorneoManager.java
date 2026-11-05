@@ -13,6 +13,10 @@ public class TorneoManager {
     private final Arena arena;
     private final RegistroCombate registro;
 
+    // ganadores de cada semifinal, los escribe cada hilo
+    private Personaje ganadorA;
+    private Personaje ganadorB;
+
     public TorneoManager(Arena arena, RegistroCombate registro) {
         this.arena = arena;
         this.registro = registro;
@@ -22,18 +26,34 @@ public class TorneoManager {
     public Personaje jugarTorneo() {
         List<Personaje> gladiadores = crearGladiadores().getMiembros();
 
-        // TALLER CONCURRENCIA: las dos semifinales se simulan una tras otra en el hilo principal.
-        // La final solo puede empezar cuando ambas hayan terminado.
-        Personaje finalista1 = simularSemifinal(gladiadores.get(0), gladiadores.get(1));
-        Personaje finalista2 = simularSemifinal(gladiadores.get(2), gladiadores.get(3));
+        // cada semifinal corre en su propio hilo
+        Thread semifinalA = new Thread(() -> ganadorA = simularSemifinal(gladiadores.get(0), gladiadores.get(1), "[A] "));
+        Thread semifinalB = new Thread(() -> ganadorB = simularSemifinal(gladiadores.get(2), gladiadores.get(3), "[B] "));
 
-        return simularFinal(finalista1, finalista2);
+        System.out.println("Estado antes de start(): A=" + semifinalA.getState() + " B=" + semifinalB.getState());
+        semifinalA.start();
+        semifinalB.start();
+
+        try {
+            Thread.sleep(50);
+            System.out.println("Estado durante la ejecucion: A=" + semifinalA.getState() + " B=" + semifinalB.getState());
+            // el hilo principal espera a que terminen las dos semifinales
+            semifinalA.join();
+            semifinalB.join();
+        } catch (InterruptedException e) {
+            System.out.println("Se interrumpio el torneo");
+            Thread.currentThread().interrupt();
+        }
+        System.out.println("Estado despues de join(): A=" + semifinalA.getState() + " B=" + semifinalB.getState());
+
+        // solo despues del join se leen los ganadores
+        return simularFinal(ganadorA, ganadorB);
     }
 
-    public Personaje simularSemifinal(Personaje a, Personaje b) {
-        registro.agregar("=== SEMIFINAL: %s vs %s ===", a.getNombre(), b.getNombre());
-        Personaje ganador = arena.duelo(a, b);
-        registro.agregar("Clasifica a la final: %s", ganador.getNombre());
+    public Personaje simularSemifinal(Personaje a, Personaje b, String etiqueta) {
+        registro.agregar("%s=== SEMIFINAL: %s vs %s ===", etiqueta, a.getNombre(), b.getNombre());
+        Personaje ganador = arena.duelo(a, b, etiqueta);
+        registro.agregar("%sClasifica a la final: %s", etiqueta, ganador.getNombre());
         return ganador;
     }
 
@@ -41,7 +61,7 @@ public class TorneoManager {
         a.restaurarVida();
         b.restaurarVida();
         registro.agregar("=== FINAL: %s vs %s ===", a.getNombre(), b.getNombre());
-        return arena.duelo(a, b);
+        return arena.duelo(a, b, "");
     }
 
     private Escuadron crearGladiadores() {

@@ -21,21 +21,34 @@ public class Consola {
 
     public int leerEntero(String mensaje, int minimo, int maximo) {
         while (true) {
-            String texto = leerLinea(mensaje);
-            if (texto.isEmpty()) {
-                System.out.println("No escribiste nada.");
-                continue;
-            }
-            try {
-                int valor = Integer.parseInt(texto);
-                if (valor >= minimo && valor <= maximo) {
-                    return valor;
-                }
-                System.out.printf("Numero fuera de rango (%d a %d).%n", minimo, maximo);
-            } catch (NumberFormatException e) {
-                System.out.println("\"" + texto + "\" no es un numero.");
+            Integer valor = convertirEntero(leerLinea(mensaje), minimo, maximo);
+            if (valor != null) {
+                return valor;
             }
         }
+    }
+
+    // devuelve null si el texto no es un numero valido (lo uso en pedirAccion para revisar el temporizador)
+    public Integer convertirEntero(String texto, int minimo, int maximo) {
+        if (texto.isEmpty()) {
+            System.out.println("No escribiste nada.");
+            return null;
+        }
+        try {
+            int valor = Integer.parseInt(texto);
+            if (valor >= minimo && valor <= maximo) {
+                return valor;
+            }
+            System.out.printf("Numero fuera de rango (%d a %d).%n", minimo, maximo);
+        } catch (NumberFormatException e) {
+            System.out.println("\"" + texto + "\" no es un numero.");
+        }
+        return null;
+    }
+
+    public boolean confirmar(String mensaje) {
+        String respuesta = leerLinea(mensaje + " (s/n): ");
+        return respuesta.equalsIgnoreCase("s") || respuesta.equalsIgnoreCase("si");
     }
 
     public String leerNombre(String mensaje) {
