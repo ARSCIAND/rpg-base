@@ -48,8 +48,17 @@ public class MotorJuego implements TurnoCallback {
     // ---- opciones del menu principal
 
     public void combateRapido() {
+        jugarCombate(crearJugador());
+    }
+
+    // TALLER JDBC: combate rapido con un heroe que se cargo desde la base de datos
+    public void combateConHeroeBD(Personaje heroe) {
+        entregarKitInicial(heroe);
+        jugarCombate(heroe);
+    }
+
+    private void jugarCombate(Personaje jugador) {
         registro.limpiar();
-        Personaje jugador = crearJugador();
         Enemigo enemigo = elegirEnemigo();
         registro.agregar("%n=== %s vs %s ===", jugador.getNombre(), enemigo.getNombre());
 
@@ -289,11 +298,14 @@ public class MotorJuego implements TurnoCallback {
         boolean intacto = jugador.getVida() == jugador.getVidaMaxima();
         List<String> candidatos = List.of("Primera Victoria", "Cazador de " + enemigo.getNombre(),
                 intacto ? "Intocable" : "");
-        for (String logro : candidatos) {
-            if (!logro.isEmpty() && perfil.desbloquearLogro(logro)) {
-                registro.agregar("Logro desbloqueado: %s", logro);
-            }
-        }
+        // TALLER STREAMS: se descarta el logro vacio y a los demas se les intenta desbloquear
+        candidatos.stream()
+                .filter(logro -> !logro.isEmpty())
+                .forEach(logro -> {
+                    if (perfil.desbloquearLogro(logro)) {
+                        registro.agregar("Logro desbloqueado: %s", logro);
+                    }
+                });
     }
 
     private void repartirBotin(Personaje jugador) {
@@ -350,9 +362,8 @@ public class MotorJuego implements TurnoCallback {
         System.out.println("Victorias: " + perfil.getVictorias() + " | Logros: " + perfil.getLogros());
         System.out.println("Campo transient despues de cargar: " + partida.getNota());
         // comprobar que los personajes siguen apuntando al mismo gremio
-        for (Personaje heroe : gremio.getMiembros()) {
-            System.out.println("  " + heroe.getNombre() + " sigue en el gremio: " + (heroe.getGremio() == gremio));
-        }
+        gremio.getMiembros().forEach(heroe ->
+                System.out.println("  " + heroe.getNombre() + " sigue en el gremio: " + (heroe.getGremio() == gremio)));
     }
 
     public void mostrarHistorial() {
@@ -362,9 +373,7 @@ public class MotorJuego implements TurnoCallback {
             return;
         }
         System.out.println("\n=== HISTORIAL DE COMBATES ===");
-        for (String linea : lineas) {
-            System.out.println(linea);
-        }
+        lineas.forEach(System.out::println);   // TALLER LAMBDAS: referencia a metodo como Consumer
     }
 
     public void mostrarArchivos() {

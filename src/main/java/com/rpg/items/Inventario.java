@@ -5,6 +5,7 @@ import com.rpg.exceptions.CapacidadExcedidaException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 import java.io.Serializable;
 
 /** Contenedor generico con capacidad limitada: Inventario&lt;Pocion&gt; solo acepta pociones. */
@@ -43,6 +44,11 @@ public class Inventario<T> implements Iterable<T>, Serializable {
 
     public boolean estaVacio() {
         return elementos.isEmpty();
+    }
+
+    // TALLER STREAMS: para recorrer el inventario con filter, map, flatMap...
+    public Stream<T> stream() {
+        return elementos.stream();
     }
 
     @Override

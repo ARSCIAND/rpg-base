@@ -34,12 +34,12 @@ public class Bestiario {
 
     /** Busca ignorando mayusculas (equalsIgnoreCase, nunca ==). @return copia nueva o null si no existe */
     public Enemigo crearEnemigo(String nombre) {
-        for (Map.Entry<String, Enemigo> entrada : catalogo.entrySet()) {
-            if (entrada.getKey().equalsIgnoreCase(nombre)) {
-                return entrada.getValue().copia();
-            }
-        }
-        return null;
+        // TALLER STREAMS: filter busca la llave, findFirst se queda con la primera y map saca la copia
+        return catalogo.entrySet().stream()
+                .filter(entrada -> entrada.getKey().equalsIgnoreCase(nombre))
+                .map(entrada -> entrada.getValue().copia())
+                .findFirst()
+                .orElse(null);
     }
 
     public synchronized void registrarEnemigoDerrotado(String nombre) {

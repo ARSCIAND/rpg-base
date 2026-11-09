@@ -26,13 +26,10 @@ public class Escuadron {
     }
 
     public int contarVivos() {
-        int vivos = 0;
-        for (Personaje personaje : miembros) {
-            if (personaje.estaVivo()) {
-                vivos++;
-            }
-        }
-        return vivos;
+        // TALLER STREAMS: antes era un for con un contador
+        return (int) miembros.stream()
+                .filter(Personaje::estaVivo)
+                .count();
     }
 
     public void disolver() {
